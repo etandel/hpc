@@ -1,0 +1,4 @@
+9c9
+<     newtour->tour = (town_index_t *) malloc(num_vertexes);
+---
+>     newtour->tour = (town_index_t *) malloc(sizeof(town_index_t)*num_vertexes);
