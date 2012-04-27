@@ -22,7 +22,6 @@ Tour * tour_new(TownList *towns) {
     for (i=0; i<num_vertexes; i++){
         newtour->tour[i] = tp_random_town(tp);
     }
-    
 
     newtour->length = tour_length(newtour);
     tp_destroy(tp);
