@@ -48,7 +48,7 @@ int main(const int argc, const char *argv[]){
     }
     
 
-    printf("Total time: %f\n", start - omp_get_wtime());
+    printf("Total time: %f\n", omp_get_wtime() - start);
     printf("After %d iterations, the best length: %f\n", i, tour_length(old_tour));
     tour_destroy(old_tour);
     tl_destroy(towns);
