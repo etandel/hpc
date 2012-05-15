@@ -32,4 +32,4 @@ parallel: $(OBJ_PAR)
 	$(CC) -o $@ $^ -fopenmp $(CFLAGS) $(LIBS)
 
 clean:
-	rm -f $(ODIR)/*.o *~ sequential parallel $(INCDIR)/*~ 
+	rm -f $(ODIR)/*.o *~ sequential parallel gmon.out $(INCDIR)/*~ 
