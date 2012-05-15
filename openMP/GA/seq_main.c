@@ -5,11 +5,12 @@
 #include "town.h"
 #include "population.h"
 #include <omp.h>
+#include <float.h>
 
 int main (const int argc, const char * argv[]){
     Town * t_list;
     Population * pop;
-    fit_t max_fitness = 0;
+    fit_t max_fitness = -DBL_MAX/2;
     Subject fittest;
     int stag_count=0, iter=0;
 
@@ -27,7 +28,7 @@ int main (const int argc, const char * argv[]){
         iter++;
         if (pop->max_fitness > max_fitness){
             fittest     = pop->pop[pop->fittest];
-            printf("fittest fitness: %f\n", fittest.fitness);
+            //printf("fittest fitness: %f\n", fittest.fitness);
             max_fitness = pop->max_fitness;
             stag_count  = 0;
             //printf("New max fitness: %.17f\n", max_fitness);
@@ -40,8 +41,6 @@ int main (const int argc, const char * argv[]){
 
     printf("After %d iterations in %f seconds,\n", iter, omp_get_wtime() - start);
     printf("length: %.17f\n", subj_tour_length(&fittest, t_list));
-    printf("Tour:\n");
-    subj_print_tour(&fittest, t_list);
     pop_destroy(pop);
     town_list_destroy(t_list);
 
