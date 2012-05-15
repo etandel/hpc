@@ -4,22 +4,24 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <float.h>
 
 #define random_gene() ((gene_t)(rand() % NUM_VERTEXES))
 
 fit_t subj_tour_length(Subject * subj, Town *t_list){
-    gene_t i, *tour=subj->tour;
+    gene_t i = NUM_VERTEXES-1, *tour=subj->tour;
     fit_t total_len = 0;
 
-    for (i=1; i<NUM_VERTEXES; i++)
-        total_len += town_distance(t_list, tour[i-1], tour[i]);
+    for (i=0; i<NUM_VERTEXES-1; i++){
+        total_len += town_distance(t_list, tour[i], tour[i+1]);
+    }
     total_len += town_distance(t_list, tour[i], tour[0]); //the return to the beginning
 
     return total_len;
 }
 
 fit_t calc_fitness(Subject * subj, Town *t_list){
-    return 1/subj_tour_length(subj, t_list);
+    return -subj_tour_length(subj, t_list);
 }
 
 void subj_print_tour(Subject * subj, Town *t_list){
@@ -31,23 +33,23 @@ void subj_print_tour(Subject * subj, Town *t_list){
 
 /****** Beginning of random_new() and its auxiliary functions ******/
 
-static fit_t add_random_subj(Population * newp, pop_index_t i){
+static fit_t add_random_subj(Population * newp, subj_t i){
     gene_t gene_i;
     Subject * subj = newp->pop+i;
-    GenePool gp = pool_gene_new();
+    GenePool gp = gp_new();
 
     for (gene_i=0; gene_i<NUM_VERTEXES; gene_i++)
-        subj->tour[gene_i] = pool_gene_get_random(gp);
+        subj->tour[gene_i] = gp_get_random(gp);
 
-    pool_gene_destroy(gp);
+    gp_destroy(gp);
 
     return subj->fitness = calc_fitness(subj, newp->town_list);
 }
 
 static Population * random_new(Town * t_list){
     //returns new generation with random subjects
-    pop_index_t i, fittest;
-    fit_t max_fit=0;
+    subj_t i, fittest;
+    fit_t max_fit=-DBL_MAX/2;
 
     Population *newp = (Population*) malloc(sizeof(Population));
     newp->pop        = (Subject*) malloc(POP_SIZE*sizeof(Subject));
@@ -84,16 +86,16 @@ static void crossover(gene_t *a_tour, gene_t *b_tour, gene_t *child_tour, GenePo
     //first part is equal to parent_a
     for (i=0; i<cross_point; i++){
         child_tour[i] = a_tour[i];
-        pool_gene_remove(gp, child_tour[i]);
+        gp_remove(gp, child_tour[i]);
     }
 
     //second part is equal to b unless the gene is unusable;
     //if so, keep a track of holes to be filled afterwards randomly
     for (; i<NUM_VERTEXES; i++){
         gene_t tmp = b_tour[i];
-        if (pool_gene_usable(gp, tmp)){
+        if (gp_usable(gp, tmp)){
             child_tour[i] = tmp;
-            pool_gene_remove(gp, tmp);
+            gp_remove(gp, tmp);
         }
         else{
             //sets holes vec with index of hole
@@ -103,8 +105,8 @@ static void crossover(gene_t *a_tour, gene_t *b_tour, gene_t *child_tour, GenePo
             
     //hole filling with random usable genes
     for (i=0; i<nholes; i++){
-        child_tour[holes[i]] = pool_gene_get_random(gp);
-        pool_gene_remove(gp, child_tour[holes[i]]);
+        child_tour[holes[i]] = gp_get_random(gp);
+        gp_remove(gp, child_tour[holes[i]]);
     }
 }
 
@@ -126,7 +128,7 @@ static Subject reproduce(Subject *parent_a, Subject *parent_b, Town * t_list){
     // returns possibly mutated child of a and b
     Subject new_subj;
     gene_t *tour = new_subj.tour , i;
-    GenePool gp = pool_gene_new();
+    GenePool gp = gp_new();
 
     // if crossover shouldn't occur, child is equal to a
     if (MUST_CROSS)
@@ -139,7 +141,7 @@ static Subject reproduce(Subject *parent_a, Subject *parent_b, Town * t_list){
         mutate(&new_subj);
 
     new_subj.fitness = calc_fitness(&new_subj, t_list);
-    pool_gene_destroy(gp);
+    gp_destroy(gp);
     return new_subj;   
 }
 
@@ -147,16 +149,16 @@ static Subject reproduce(Subject *parent_a, Subject *parent_b, Town * t_list){
 #define BEST_FIT(s1, s2) (s1.fitness > s2.fitness ? i : i+1)
 static Population * next_generation(Population *oldp, Town * t_list){
     //returns next generation
-    fit_t max_fit = 0;
-    pop_index_t i, fittest;
+    fit_t max_fit = -DBL_MAX/2;
+    subj_t i, fittest;
 
     Population *newp = (Population*) malloc(sizeof(Population));
     newp->pop        = (Subject*)    malloc(POP_SIZE*sizeof(Subject));
 
     // generates, for every random pair of parents, 2 children
-    for (i=0; i<POP_SIZE/2; i+=2){
+    for (i=0; i<POP_SIZE; i+=2){
         fit_t best_child_fitness;
-        pop_index_t best_child;
+        subj_t best_child;
 
         Subject *parent_a, *parent_b;
 
@@ -171,6 +173,8 @@ static Population * next_generation(Population *oldp, Town * t_list){
         //gets best of the 2 children and sets max_fit/fittest vars if better
         best_child = BEST_FIT(newp->pop[i], newp->pop[i+1]);
         best_child_fitness = newp->pop[best_child].fitness;
+        if (best_child_fitness > -1)
+            printf("%f\n", best_child_fitness);
         if (best_child_fitness > max_fit){
             max_fit = best_child_fitness;
             fittest = best_child;
@@ -189,7 +193,7 @@ static Population * next_generation(Population *oldp, Town * t_list){
 
 /****** Beginning of interface  ******/
 
-//fit_t subj_tour_lenght(Population *pop, pop_index_t subj_i, Town *t_list){
+//fit_t subj_tour_lenght(Population *pop, subj_t subj_i, Town *t_list){
 //    /* length of the tour */
 //}
 

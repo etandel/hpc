@@ -12,7 +12,7 @@ typedef struct subject Subject;
 
 struct population {
     fit_t max_fitness;
-    pop_index_t fittest; 
+    subj_t fittest; 
     Town * town_list;
     Subject * pop;
 };
