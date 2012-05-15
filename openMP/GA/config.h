@@ -12,8 +12,6 @@ on type definitions below (marked with an *). */
 // number of generations not improved that stop execution (<= max_int)
 #define STAG_COUNT     500
 // number proportional to the severeness of fitness evaluation
-#define FIT_PRECISION  10000000
-
 
 
 /* type definitions dependent on above constants */

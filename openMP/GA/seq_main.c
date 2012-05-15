@@ -5,12 +5,11 @@
 #include "town.h"
 #include "population.h"
 #include <omp.h>
-#include <float.h>
 
 int main (const int argc, const char * argv[]){
     Town * t_list;
     Population * pop;
-    fit_t max_fitness = -DBL_MAX/2;
+    fit_t max_fitness = FIT_MIN;
     Subject fittest;
     int stag_count=0, iter=0;
 

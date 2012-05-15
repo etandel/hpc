@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <float.h>
 
 #define random_gene() ((gene_t)(rand() % NUM_VERTEXES))
 
@@ -50,7 +49,7 @@ static fit_t add_random_subj(Population * newp, subj_t i){
 static Population * random_new(Town * t_list){
     //returns new generation with random subjects
     subj_t i, fittest;
-    fit_t max_fit=-DBL_MAX/2;
+    fit_t max_fit = FIT_MIN;
 
     Population *newp = (Population*) malloc(sizeof(Population));
     newp->pop        = (Subject*) malloc(POP_SIZE*sizeof(Subject));
@@ -150,7 +149,7 @@ static Subject reproduce(Subject *parent_a, Subject *parent_b, Town * t_list){
 #define BEST_FIT(s1, s2) (s1.fitness > s2.fitness ? i : i+1)
 static Population * next_generation(Population *oldp, Town * t_list){
     //returns next generation
-    fit_t max_fit = -DBL_MAX/2;
+    fit_t max_fit = FIT_MIN;
     subj_t i, fittest;
 
     Population *newp = (Population*) malloc(sizeof(Population));

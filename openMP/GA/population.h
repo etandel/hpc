@@ -3,6 +3,9 @@
 
 #include "config.h"
 #include "town.h"
+#include <float.h>
+
+#define FIT_MIN -DBL_MAX
 
 struct subject{
     fit_t fitness;
