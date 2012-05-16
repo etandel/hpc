@@ -24,7 +24,7 @@ for i in $(seq $ntests); do
 done
 par8_time=$(echo $par8_time | bc)
 echo "Total time: $par8_time"
-echo "Speedup: $(echo -e "scale=10\n"$seq_time/$par8_time | bc)"
+echo "Speedup 8: $(echo -e "scale=10\n"$seq_time/$par8_time | bc)"
 
 
 ############ Parallel 4 ###########
@@ -37,4 +37,4 @@ for i in $(seq $ntests); do
 done
 par4_time=$(echo $par4_time | bc)
 echo "Total time: $par4_time"
-echo "Speedup: $(echo -e "scale=10\n"$seq_time/$par4_time | bc)"
+echo "Speedup 4: $(echo -e "scale=10\n"$seq_time/$par4_time | bc)"
