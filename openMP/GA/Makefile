@@ -33,3 +33,6 @@ parallel: $(OBJ_PAR)
 
 clean:
 	rm -f $(ODIR)/*.o *~ sequential parallel gmon.out $(INCDIR)/*~ 
+
+config:
+	mkdir $(ODIR)

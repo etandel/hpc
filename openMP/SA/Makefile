@@ -20,7 +20,7 @@ OBJ_PAR = $(patsubst %,$(ODIR)/%,$(_OBJ_PAR))
 $(ODIR)/%.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-.PHONY: clean all
+.PHONY: clean all configure
 
 all:
 	make sequential
@@ -34,3 +34,6 @@ parallel: $(OBJ_PAR)
 
 clean:
 	rm -f $(ODIR)/*.o *~ sequential parallel $(INCDIR)/*~ 
+
+config:
+	mkdir $(ODIR)
