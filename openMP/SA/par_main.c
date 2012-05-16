@@ -76,7 +76,7 @@ int main(const int argc, const char *argv[]){
     }
     
 
-    printf("Sequential time: %f\n", omp_get_wtime() - start);
+    printf("Parallel time: %f\n", omp_get_wtime() - start);
     if (verbose)
         printf("After %d iterations, the best length: %f\n", i, tour_length(old_tour));
     tour_destroy(old_tour);
