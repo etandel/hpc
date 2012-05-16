@@ -1,12 +1,13 @@
 #!/bin/bash
 
 ntests=10
+nvertexes=
 
 ############ Sequential ###########
 echo -e "Executanto versao sequencial $ntests vezes.\n"
 seq_time=0
 for i in $(seq $ntests); do
-    output=$(./sequential)
+    output=$(./sequential $nvertexes)
     echo $output
     seq_time=$seq_time+$(echo $output | cut -d' ' -f6)
 done
@@ -18,7 +19,7 @@ echo -e "Total iter/time: $seq_time"
 echo -e "\nExecutanto versao paralela com 8 threads $ntests vezes."
 par8_time=0
 for i in $(seq $ntests); do
-    output=$(./parallel -n 8)
+    output=$(./parallel -t 8 $param_vertexes)
     echo $output
     par8_time=$par8_time+$(echo $output | cut -d' ' -f6)
 done
@@ -31,7 +32,7 @@ echo "Speedup 8: $(echo -e "scale=10\n"$seq_time/$par8_time | bc)"
 echo -e "\nExecutanto versao paralela com 4 threads $ntests vezes."
 par4_time=0
 for i in $(seq $ntests); do
-    output=$(./parallel -n 4)
+    output=$(./parallel -t 4 $param_vertexes)
     echo $output
     par4_time=$par4_time+$(echo $output | cut -d' ' -f6)
 done
