@@ -12,9 +12,11 @@ static void add_random_town(Town * t_list, int i){
     t_list[i].y = random_coord(0, GRID_SIZE);
 }
 
-Town * town_list_init(void){
-    Town * newt = (Town *) malloc(NUM_VERTEXES * sizeof(Town));
-    int i;
+Town * town_list_init(gene_t nvertex){
+    gene_t i;
+    Town * newt;
+    nvertex = nvertex ? nvertex : NUM_VERTEXES;
+    newt = (Town *) malloc(NUM_VERTEXES * sizeof(Town));
     for (i=0; i<NUM_VERTEXES; i++)
         add_random_town(newt, i);
 

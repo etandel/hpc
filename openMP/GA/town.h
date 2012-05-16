@@ -10,7 +10,7 @@ struct town{
 typedef struct town Town;
 
 
-Town * town_list_init(void); //returns list of randomly generated towns
+Town * town_list_init(gene_t); //returns list of randomly generated towns
 void town_list_destroy(Town *); //destroy list of towns
 
 //returns distance between two towns

@@ -31,6 +31,6 @@ void pop_destroy(Population *); //destroys population
 
 // returns next generation (if old population is given)
 // or new population with random subjects (if NULL is passed as first parameter)
-Population * pop_new(Population *, Town *);
+Population * pop_new(Population *, subj_t, Town *, gene_t);
 
 #endif

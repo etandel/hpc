@@ -7,6 +7,9 @@
 
 #define random_gene() ((gene_t)(rand() % NUM_VERTEXES))
 
+static gene_t nvertexes;
+static subj_t pop_size;
+
 fit_t subj_tour_length(Subject * subj, Town *t_list){
     gene_t i = NUM_VERTEXES-1, *tour=subj->tour;
     fit_t total_len = 0;
@@ -197,7 +200,9 @@ static Population * next_generation(Population *oldp, Town * t_list){
 //    /* length of the tour */
 //}
 
-Population * pop_new(Population *oldp, Town *t_list){
+Population * pop_new(Population *oldp, subj_t pop_s, Town *t_list, gene_t ntowns){
+    pop_size = pop_s ? pop_s : POP_SIZE;
+    nvertexes = ntowns ? ntowns : NUM_VERTEXES;
     return oldp ? next_generation(oldp, t_list) : random_new(t_list);
 }
 

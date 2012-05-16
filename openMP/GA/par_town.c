@@ -13,9 +13,11 @@ static void add_random_town(Town * t_list, gene_t i){
     t_list[i].y = random_coord(0, GRID_SIZE);
 }
 
-Town * town_list_init(void){
-    Town * newt = (Town *) malloc(NUM_VERTEXES * sizeof(Town));
+Town * town_list_init(gene_t nvertex){
+    Town * newt;
     gene_t i;
+    nvertex = nvertex ? nvertex : NUM_VERTEXES;
+    newt = (Town *) malloc(NUM_VERTEXES * sizeof(Town));
 
     #pragma omp parallel for
     for (i=0; i<NUM_VERTEXES; i++)
