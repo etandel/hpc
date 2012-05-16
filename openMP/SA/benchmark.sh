@@ -18,7 +18,7 @@ echo -e "Total time: $seq_time"
 echo -e "\nExecutanto versao paralela com 8 threads $ntests vezes."
 par8_time=0
 for i in $(seq $ntests); do
-    output=$(./parallel -n 8 | cut -d' ' -f3)
+    output=$(./parallel -n 8)
     echo $output
     par8_time=$par8_time+$(echo $output | cut -d' ' -f3)
 done
@@ -31,7 +31,7 @@ echo "Speedup 8: $(echo -e "scale=10\n"$seq_time/$par8_time | bc)"
 echo -e "\nExecutanto versao paralela com 4 threads $ntests vezes."
 par4_time=0
 for i in $(seq $ntests); do
-    output=$(./parallel -n 4 | cut -d' ' -f3)
+    output=$(./parallel -n 4)
     echo $output
     par4_time=$par4_time+$(echo $output | cut -d' ' -f3)
 done
