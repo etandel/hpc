@@ -4,22 +4,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <omp.h>
 
 #define random_gene() ((gene_t)(rand() % NUM_VERTEXES))
 
-static gene_t nvertexes;
-static subj_t pop_size;
-
 fit_t subj_tour_length(Subject * subj, Town *t_list){
-    gene_t i = NUM_VERTEXES-1, *tour=subj->tour;
+    gene_t i=0, *tour=subj->tour;
     fit_t total_len = 0;
-
-    #pragma omp parallel for reduction(+:total_len)
+    #pragma omp parallel for reduction(+:total_len) lastprivate(i)
     for (i=0; i<NUM_VERTEXES-1; i++){
         total_len += town_distance(t_list, tour[i], tour[i+1]);
     }
     total_len += town_distance(t_list, tour[i], tour[0]); //the return to the beginning
-
     return total_len;
 }
 
@@ -57,7 +53,6 @@ static Population * random_new(Town * t_list){
     Population *newp = (Population*) malloc(sizeof(Population));
     newp->pop        = (Subject*) malloc(POP_SIZE*sizeof(Subject));
     newp->town_list  = t_list;
-
     for (i=0; i<POP_SIZE; i++){
         //adds random subjs and calcs fittest
         fit_t new_fit;
@@ -201,8 +196,6 @@ static Population * next_generation(Population *oldp, Town * t_list){
 //}
 
 Population * pop_new(Population *oldp, subj_t pop_s, Town *t_list, gene_t ntowns){
-    pop_size = pop_s ? pop_s : POP_SIZE;
-    nvertexes = ntowns ? ntowns : NUM_VERTEXES;
     return oldp ? next_generation(oldp, t_list) : random_new(t_list);
 }
 

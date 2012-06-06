@@ -15,7 +15,7 @@ static struct args {
 
 static int read_args(const int argc, const char *argv[], struct args * args){
     int i;
-    int v = 0, nthreads = 8;
+    int v = 0   , nthreads = 8;
     gene_t nvertex=NUM_VERTEXES;
     subj_t npop=POP_SIZE;
     if (argc == 0) return 0;
@@ -24,17 +24,17 @@ static int read_args(const int argc, const char *argv[], struct args * args){
             v = 1;
         else if (strcmp(argv[i], "-t") == 0){
             //-t without any arguments after or with no following integer
-            if ((argc == i+1) || (sscanf(argv[i+1], "%d", &nthreads) == 0))
+            if ((argc == i+1) || (sscanf(argv[i+1], "%u", &nthreads) == 0))
                 return 0;
         }
         else if (strcmp(argv[i], "-n") == 0){
             //-t without any arguments after or with no following integer
-            if ((argc == i+1) || (sscanf(argv[i+1], "%d", &nvertex) == 0))
+            if ((argc == i+1) || (sscanf(argv[i+1], "%u", &nvertex) == 0))
                 return 0;
         }
         else if (strcmp(argv[i], "-p") == 0){
             //-t without any arguments after or with no following integer
-            if ((argc == i+1) || (sscanf(argv[i+1], "%d", &npop) == 0))
+            if ((argc == i+1) || (sscanf(argv[i+1], "%u", &npop) == 0))
                 return 0;
         }
         
@@ -42,6 +42,7 @@ static int read_args(const int argc, const char *argv[], struct args * args){
     }
     args->verbose = v;
     args->nvertex = nvertex;
+    args->nthreads= nthreads;
     args->npop    = npop;
     return 1;
 }
@@ -69,7 +70,6 @@ int main (const int argc, const char * argv[]){
     start = omp_get_wtime();
 
     t_list = town_list_init(args.nvertex);
-
     pop = pop_new(NULL, args.npop, t_list, args.nvertex);
     do {
         iter++;

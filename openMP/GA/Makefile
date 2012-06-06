@@ -1,6 +1,6 @@
 IDIR =.
 CC=gcc
-CFLAGS=-I$(IDIR) -O0 -pg -lgomp
+CFLAGS=-I$(IDIR) -fopenmp -O0
 
 ODIR=obj
 LDIR=../lib
@@ -29,10 +29,11 @@ sequential: $(OBJ_SEQ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 parallel: $(OBJ_PAR)
-	$(CC) -o $@ $^ -fopenmp $(CFLAGS) $(LIBS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 clean:
 	rm -f $(ODIR)/*.o *~ sequential parallel gmon.out $(INCDIR)/*~ 
 
 config:
-	mkdir $(ODIR)
+	chmod +x benchmark.sh
+	[ -d $(ODIR) ] || mkdir $(ODIR)

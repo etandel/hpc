@@ -4,8 +4,8 @@
 /* type definitions of below params */
 
 //defaults of config values
-#define GRID_SIZE      255   // grid goes from 0 to 255 in both axes
-#define NUM_VERTEXES   255   // max number of towns on a tour
+#define GRID_SIZE      100   // grid goes from 0 to 255 in both axes
+#define NUM_VERTEXES   500  // max number of towns on a tour
 #define ALPHA          0.99999 //rate of cooling (temperature *= alpha)
 #define EPSILON        0.1   // minimum temperature (stopping condition)
 #define TEMPERATURE    10000  //initial temperature

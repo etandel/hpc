@@ -41,7 +41,7 @@ double tour_length(Tour * tour){
     town_index_t i=1, n_vertexes = towns->config.num_vertexes;
     town_index_t *index_list = tour->tour;
 
-    #pragma omp parallel for reduction(+:len)
+    #pragma omp parallel for reduction(+:len) lastprivate(i)
     for(i=1; i<n_vertexes; i++)
         len += tl_distance(towns, index_list[i-1], index_list[i]);
     len += tl_distance(towns, index_list[0], index_list[i-1]);

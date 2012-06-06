@@ -16,10 +16,9 @@ static void add_random_town(Town * t_list, gene_t i){
 Town * town_list_init(gene_t nvertex){
     Town * newt;
     gene_t i;
-    nvertex = nvertex ? nvertex : NUM_VERTEXES;
     newt = (Town *) malloc(NUM_VERTEXES * sizeof(Town));
 
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (i=0; i<NUM_VERTEXES; i++)
         add_random_town(newt, i);
 

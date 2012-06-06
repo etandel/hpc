@@ -36,4 +36,5 @@ clean:
 	rm -f $(ODIR)/*.o *~ sequential parallel $(INCDIR)/*~ 
 
 config:
-	mkdir $(ODIR)
+	chmod +x benchmark.sh
+	[ -d $(ODIR) ] || mkdir $(ODIR)
