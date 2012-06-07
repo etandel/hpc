@@ -21,14 +21,14 @@ $(ODIR)/%.o: %.c $(DEPS)
 
 .PHONY: clean all profile
 
+parallel: $(OBJ_PAR)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
 all:
 	make sequential
 	make parallel
 
 sequential: $(OBJ_SEQ)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
-
-parallel: $(OBJ_PAR)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 clean:
