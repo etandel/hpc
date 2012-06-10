@@ -10,8 +10,8 @@
 #define EPSILON        0.1   // minimum temperature (stopping condition)
 #define TEMPERATURE    10000  //initial temperature
 
-typedef unsigned char  coord_t; //type of coordinates (>= GRID_SIZE)
-typedef unsigned short town_index_t; //type for indexing town list ( > NUM_VERTEXES)
+typedef unsigned int coord_t; //type of coordinates (>= GRID_SIZE)
+typedef unsigned int town_index_t; //type for indexing town list ( > NUM_VERTEXES)
 
 struct config {
     coord_t      grid_size;
