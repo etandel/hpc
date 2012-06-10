@@ -5,7 +5,7 @@
 on type definitions below (marked with an *). */
 
 #define GRID_SIZE      10000  // grid goes from 0 to 255 in both axes *
-#define NUM_VERTEXES   5000  // number of towns and genes *
+#define NUM_VERTEXES   500  // number of towns and genes *
 #define POP_SIZE       500 // size of population must be even *
 #define CROSS_PROB     0.9  // probability of crossover occuring
 #define MUTATION_PROB  0.01 //probabily of mutation occuring

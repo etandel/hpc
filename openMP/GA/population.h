@@ -16,7 +16,7 @@ typedef struct subject Subject;
 struct population {
     fit_t max_fitness;
     subj_t fittest; 
-    Town * town_list;
+    Town * t_list;
     Subject * pop;
 };
 typedef struct population Population;
@@ -36,6 +36,6 @@ Population * pop_new(Town * t_list);
 void pop_randomize(Population * empty_pop);
 
 // generates children (pre-allocated) based on parents
-void pop_randomize(Population *children, Population *parents );
+void pop_reproduce(Population *children, Population *parents);
 
 #endif

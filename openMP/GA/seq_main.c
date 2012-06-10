@@ -7,7 +7,7 @@
 #include <omp.h>
 
 
-static int verbose(const int argc, const char *argv[]){
+static int has_verbose(const int argc, const char *argv[]){
     int i, v=0;
     for (i=0; i<argc; i++){
         if (strcmp(argv[i], "-v") == 0)
@@ -22,7 +22,7 @@ int main (const int argc, const char * argv[]){
     fit_t max_fitness = FIT_MIN;
     Subject fittest;
     int stag_count=0, iter=0;
-    int verbose = vervose(argc, argv);
+    int verbose = has_verbose(argc, argv);
 
     double start;
     
@@ -33,22 +33,22 @@ int main (const int argc, const char * argv[]){
     start = omp_get_wtime();
 
     // initialization
-    t_list = town_list_init(args.nvertex);
+    t_list = town_list_init(NUM_VERTEXES);
     parents  = pop_new(t_list);
     pop_randomize(parents);
-    max_fitness = parents->max_fitness
-    fittest = parents->fittest
+    max_fitness = parents->max_fitness;
+    fittest     = parents->pop[parents->fittest];
 
     children = pop_new(t_list);
     do {
         iter++;
         pop_reproduce(children, parents);
         if (children->max_fitness > max_fitness){
-            fittest     = children->children[children->fittest];
+            fittest     = children->pop[children->fittest];
             //printf("fittest fitness: %f\n", fittest.fitness);
             max_fitness = children->max_fitness;
             stag_count  = 0;
-            //printf("New max fitness: %.17f\n", max_fitness);
+            printf("New max fitness: %.17f\n", max_fitness);
         }
         else
             stag_count++;
