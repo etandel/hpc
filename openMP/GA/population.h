@@ -29,8 +29,13 @@ void subj_print_tour(Subject *, Town *);
 
 void pop_destroy(Population *); //destroys population
 
-// returns next generation (if old population is given)
-// or new population with random subjects (if NULL is passed as first parameter)
-Population * pop_new(Population *, subj_t, Town *, gene_t);
+//return new empty population
+Population * pop_new(Town * t_list);
+
+// randomizes pre-allocated empty population
+void pop_randomize(Population * empty_pop);
+
+// generates children (pre-allocated) based on parents
+void pop_randomize(Population *children, Population *parents );
 
 #endif
