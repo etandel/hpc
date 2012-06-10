@@ -11,7 +11,8 @@ struct townlist {
 };
 typedef struct townlist TownList;
 
-TownList * tl_new(Config); //returns list of randomly generated towns
+TownList * tl_new(Config); //returns pre-allocated but empty town list
+void tl_randomize(TownList*); // randomizes pre-allocated town list
 TownList * tl_destroy(TownList *); //destroy list of towns
 
 //returns distance between two towns

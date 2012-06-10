@@ -36,6 +36,7 @@ int main(const int argc, const char *argv[]){
 
     start = MPI_Wtime();
     towns = tl_new(state);
+    tl_randomize(towns);
     old_tour = tour_new(towns); 
     while (state.temperature > state.epsilon){
         i++;
