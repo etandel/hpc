@@ -15,7 +15,7 @@ static int should_replace(Tour * new, Tour * old, double temperature){
     return dl<0 ? 1 : rand()/RAND_MAX < exp(-dl/temperature);
 }
 
-int main(const int argc, const char *argv[]){
+int main(int argc, char *argv[]){
     Config state = {
         GRID_SIZE,
         NUM_VERTEXES,
@@ -27,7 +27,12 @@ int main(const int argc, const char *argv[]){
     TownList * towns;
     Tour *old_tour, *new_tour;
     int i = 0;
+    int rank, size;
     double start;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
 
     //puts("Executing parallel version\n");
     //
@@ -56,5 +61,7 @@ int main(const int argc, const char *argv[]){
     //printf("After %d iterations, the best length: %f\n", i, tour_length(old_tour));
     tour_destroy(old_tour);
     tl_destroy(towns);
+
+    MPI_Finalize();
     return 0;
 }
