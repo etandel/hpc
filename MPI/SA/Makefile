@@ -4,7 +4,7 @@ DEBUG=
 CFLAGS=-I$(IDIR) -Wall -O0
 
 ODIR=obj
-LDIR=../lib
+LDIR=
 
 LIBS=-lm
 
@@ -27,10 +27,10 @@ all:
 	make parallel
 
 sequential: $(OBJ_SEQ)
-	$(CC) -o $@ $^ $(CFLAGS) $(DEBUG) $(LIBS)
+	$(CC) -o $@ $^ $(CFLAGS) $(DEBUG) $(LDIR) $(LIBS)
 
 parallel: $(OBJ_PAR)
-	$(CC) -o $@ $^ $(CFLAGS) $(DEBUG) $(LIBS)
+	$(CC) -o $@ $^ $(CFLAGS) $(DEBUG) $(LDIR) $(LIBS)
 
 clean:
 	rm -f $(ODIR)/*.o *~ sequential parallel $(INCDIR)/*~ 
