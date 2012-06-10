@@ -30,7 +30,7 @@ int main(int argc, char *argv[]){
 
     TownList * towns;
     Tour *old_tour, *new_tour;
-    int i = 0;
+    int i = 0, must_replace;
     double start;
 
     MPI_Init(&argc, &argv);
@@ -44,22 +44,34 @@ int main(int argc, char *argv[]){
     if (rank == MASTER)
         start = MPI_Wtime();
 
+    // generate and broadcast town list
     towns = tl_new(state);
-
     if (rank == MASTER)
         tl_randomize(towns);
     MPI_Bcast(towns->list, NUM_VERTEXES*sizeof(Town), MPI_BYTE, MASTER, MPI_COMM_WORLD);
 
-    old_tour = tour_new(towns); 
+    // generate initial tour
+    old_tour = tour_new(towns, NUM_VERTEXES); 
+    if (rank == MASTER)
+        tour_randomize(old_tour);
+    tour_set_len(old_tour);
+
+    new_tour = tour_new(towns, NUM_VERTEXES);
+    /*
     while (state.temperature > state.epsilon){
-        i++;
-        new_tour = tour_mutate(old_tour);
-        if (should_replace(new_tour, old_tour, state.temperature)){
-            tour_destroy(old_tour);
-            old_tour = new_tour;
+        if (rank == MASTER) {
+            i++;
+            tour_mutate(new_tour, old_tour);
         }
-        else{
-            tour_destroy(new_tour);
+        tour_set_len(new_tour);
+        if (rank == MASTER)
+            must_replace = should_replace(new_tour, old_tour, state.temperature);
+        
+        MPI_Bcast(&must_replace, sizeof(int), MPI_INT, MASTER, MPI_COMM_WORLD);
+        if (must_replace){
+            Tour * dummy = old_tour;
+            old_tour = new_tour;
+            new_tour = dummy;
         }
         
         state.temperature *= state.alpha;
@@ -69,7 +81,10 @@ int main(int argc, char *argv[]){
     if (rank == MASTER)
         printf("Parallel time: %f\n", MPI_Wtime() - start);
     //printf("After %d iterations, the best length: %f\n", i, tour_length(old_tour));
+    */
+
     tour_destroy(old_tour);
+    tour_destroy(new_tour);
     tl_destroy(towns);
     
     MPI_Finalize();

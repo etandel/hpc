@@ -35,18 +35,23 @@ int main(const int argc, const char *argv[]){
     srand((int)time(NULL));
 
     start = MPI_Wtime();
+
     towns = tl_new(state);
     tl_randomize(towns);
-    old_tour = tour_new(towns); 
+
+    old_tour = tour_new(towns, NUM_VERTEXES); 
+    tour_randomize(old_tour);
+    tour_set_len(old_tour);
+
+    new_tour = tour_new(towns, NUM_VERTEXES);
     while (state.temperature > state.epsilon){
         i++;
-        new_tour = tour_mutate(old_tour);
+        tour_mutate(new_tour, old_tour);
+        tour_set_len(new_tour);
         if (should_replace(new_tour, old_tour, state.temperature)){
-            tour_destroy(old_tour);
+            Tour * dummy = old_tour;
             old_tour = new_tour;
-        }
-        else{
-            tour_destroy(new_tour);
+            new_tour = dummy;
         }
         
         state.temperature *= state.alpha;
@@ -55,7 +60,9 @@ int main(const int argc, const char *argv[]){
 
     printf("Sequential time: %f\n", MPI_Wtime() - start);
     //printf("After %d iterations, the best length: %f\n", i, tour_length(old_tour));
+
     tour_destroy(old_tour);
+    tour_destroy(new_tour);
     tl_destroy(towns);
     return 0;
 }

@@ -5,29 +5,23 @@
 #include <stdlib.h>
 #include <mpi.h>
 
-static Tour * new_empty_tour(TownList *towns, town_index_t num_vertexes){
+Tour * tour_new(TownList *towns, town_index_t num_vertexes){
     Tour * newtour = (Tour*) malloc(sizeof(Tour));
     newtour->tour = (town_index_t *) malloc(sizeof(town_index_t)*num_vertexes);
     newtour->town_list = towns;
-
+    newtour->num_vertexes = num_vertexes;
     return newtour;
 }
 
-Tour * tour_new(TownList *towns) {
-    town_index_t i;
-    TownPool *tp = tp_new(NUM_VERTEXES);
-    if (!tp)
-        exit(1);
-    Tour * newtour = new_empty_tour(towns, NUM_VERTEXES);
+void tour_randomize(Tour * tour) {
+    town_index_t i, num_vertexes=tour->num_vertexes;
+    TownPool *tp = tp_new(num_vertexes);
     
-    for (i=0; i<NUM_VERTEXES; i++){
-        newtour->tour[i] = tp_random_town(tp);
+    for (i=0; i<num_vertexes; i++){
+        tour->tour[i] = tp_random_town(tp);
     }
-    
 
-    newtour->length = tour_length(newtour);
     tp_destroy(tp);
-    return newtour;
 }
 
 Tour * tour_destroy(Tour * tour){
@@ -36,26 +30,39 @@ Tour * tour_destroy(Tour * tour){
     return tour = NULL;
 }
 
-double tour_length(Tour * tour){
+double partial_len(Tour *tour, town_index_t num_vertex){
     double len = 0;
     TownList * towns = tour->town_list;
-    town_index_t i=1;
+    town_index_t i;
     town_index_t *index_list = tour->tour;
 
-    for(i=1; i<NUM_VERTEXES; i++)
+    for(i=1; i<num_vertex; i++)
         len += tl_distance(towns, index_list[i-1], index_list[i]);
     len += tl_distance(towns, index_list[0], index_list[i-1]);
 
+    tour->length = len;
     return len;
 }
 
-Tour * tour_mutate(Tour *old_tour) {
+double tour_set_len(Tour * tour){
+    double len;
+    int rank, size;
+    int chunk_size, tmp_nvertex;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    MPI_Scatter(tour->tour, chunk_size, MPI_UNSIGNED,
+                tmp_tour->tour, chunk_size, MPI_UNSIGNED,
+                MASTER, MPI_COMM_WORLD);
+    Tour *tmp_tour = tour_new(tour->town_list);
+}
+
+void tour_mutate(Tour *new_tour, Tour *old_tour) {
     town_index_t i;
     TownPool *tp;
-    Tour * new_tour;
 
-    tp           = tp_new(NUM_VERTEXES);
-    new_tour     = new_empty_tour(old_tour->town_list, NUM_VERTEXES);
+    tp = tp_new(NUM_VERTEXES);
 
     for (i=0; i<NUM_VERTEXES; i++){
         new_tour->tour[i] = old_tour->tour[i];
@@ -69,8 +76,5 @@ Tour * tour_mutate(Tour *old_tour) {
         new_tour->tour[i2] = old_tour->tour[i1];
     }
 
-    new_tour->length = tour_length(new_tour);
-
     tp_destroy(tp);
-    return new_tour;
 }
