@@ -18,7 +18,7 @@ echo -e "Total time: $seq_time"
 echo -e "\nExecutanto versao paralela com 8 processos $ntests vezes."
 par8_time=0
 for i in $(seq $ntests); do
-    output=$(./parallel)
+    output=$(mpiexec -n 8 ./parallel)
     echo $output
     par8_time=$par8_time+$(echo $output | cut -d' ' -f3)
 done
@@ -31,7 +31,7 @@ echo "Speedup 8: $(echo -e "scale=10\n"$seq_time/$par8_time | bc)"
 echo -e "\nExecutanto versao paralela com 4 processos $ntests vezes."
 par4_time=0
 for i in $(seq $ntests); do
-    output=$(./parallel)
+    output=$(mpiexec -n 4 ./parallel)
     echo $output
     par4_time=$par4_time+$(echo $output | cut -d' ' -f3)
 done
