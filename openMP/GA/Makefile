@@ -19,16 +19,16 @@ OBJ_PAR = $(patsubst %,$(ODIR)/%,$(_OBJ_PAR))
 $(ODIR)/%.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-.PHONY: clean all profile
-
-parallel: $(OBJ_PAR)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+.PHONY: clean all config
 
 all:
 	make sequential
 	make parallel
 
 sequential: $(OBJ_SEQ)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+parallel: $(OBJ_PAR)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 clean:
