@@ -6,84 +6,65 @@
 #include "population.h"
 #include <omp.h>
 
-static struct args {
-    int verbose;
-    gene_t nvertex;
-    subj_t npop;
-};
 
-static int read_args(const int argc, const char *argv[], struct args * args){
-    int i;
-    int v = 0;
-    gene_t nvertex=NUM_VERTEXES;
-    subj_t npop=POP_SIZE;
-    if (argc == 0) return 0;
+static int verbose(const int argc, const char *argv[]){
+    int i, v=0;
     for (i=0; i<argc; i++){
         if (strcmp(argv[i], "-v") == 0)
             v = 1;
-        else if (strcmp(argv[i], "-n") == 0){
-            //-t without any arguments after or with no following integer
-            if ((argc == i+1) || (sscanf(argv[i+1], "%d", &nvertex) == 0))
-                return 0;
-        }
-        else if (strcmp(argv[i], "-p") == 0){
-            //-t without any arguments after or with no following integer
-            if ((argc == i+1) || (sscanf(argv[i+1], "%d", &npop) == 0))
-                return 0;
-        }
-        
-
     }
-    args->verbose = v;
-    args->nvertex = nvertex;
-    args->npop    = npop;
-    return 1;
+    return v;
 }
 
 int main (const int argc, const char * argv[]){
-    struct args args;
-    Town * t_list;
-    Population * pop;
+    Town *t_list;
+    Population *parents, *children, *dummy;
     fit_t max_fitness = FIT_MIN;
     Subject fittest;
     int stag_count=0, iter=0;
+    int verbose = vervose(argc, argv);
 
     double start;
     
-    if (!read_args(argc, argv, &args)){
-        puts("Bad argument list. Exiting...");
-        return 1;
-    }
-
-    if (args.verbose)
+    if (verbose)
         puts("Executing sequential version");
 
     srand((int)time(NULL)); //seed pseudo-rand generator
     start = omp_get_wtime();
 
+    // initialization
     t_list = town_list_init(args.nvertex);
-    pop = pop_new(NULL, args.npop, t_list, args.nvertex);
+    parents  = pop_new(t_list);
+    pop_randomize(parents);
+    max_fitness = parents->max_fitness
+    fittest = parents->fittest
+
+    children = pop_new(t_list);
     do {
         iter++;
-        if (pop->max_fitness > max_fitness){
-            fittest     = pop->pop[pop->fittest];
+        pop_reproduce(children, parents);
+        if (children->max_fitness > max_fitness){
+            fittest     = children->children[children->fittest];
             //printf("fittest fitness: %f\n", fittest.fitness);
-            max_fitness = pop->max_fitness;
+            max_fitness = children->max_fitness;
             stag_count  = 0;
             //printf("New max fitness: %.17f\n", max_fitness);
         }
         else
             stag_count++;
 
-        pop = pop_new(pop, args.npop, t_list, args.nvertex);
+        dummy    = parents;
+        parents  = children;
+        children = dummy;
     } while(stag_count < STAG_COUNT);
 
     printf("Sequential iterations / time = %f\n", iter / (omp_get_wtime() - start));
-    if (args.verbose){
+    if (verbose){
         printf("Sequential iterations: %d ; sequential time: %f seconds.\n", iter, omp_get_wtime() - start);
         printf("length: %.17f\n", subj_tour_length(&fittest, t_list));
     }
-    pop_destroy(pop);
+    pop_destroy(parents);
+    pop_destroy(children);
     town_list_destroy(t_list);
 
     return 0;
