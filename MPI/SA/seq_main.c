@@ -59,7 +59,7 @@ int main(const int argc, const char *argv[]){
     
 
     printf("Sequential time: %f\n", MPI_Wtime() - start);
-    //printf("After %d iterations, the best length: %f\n", i, tour_length(old_tour));
+    //printf("After %d iterations, the best length: %f\n", i, old_tour->length);
 
     tour_destroy(old_tour);
     tour_destroy(new_tour);
