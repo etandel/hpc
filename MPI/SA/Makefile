@@ -1,7 +1,7 @@
 IDIR =.
-CC=gcc
+CC=mpicc
 DEBUG=
-CFLAGS=-I$(IDIR) -Wall -O0 -fopenmp
+CFLAGS=-I$(IDIR) -Wall -O0
 
 ODIR=obj
 LDIR=../lib
