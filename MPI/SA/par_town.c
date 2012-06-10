@@ -3,11 +3,6 @@
 #include "town.h"
 #include "config.h"
 
-struct town{
-    coord_t x;
-    coord_t y;
-};
-
 #define RANDOM_COORD(min, max) (coord_t)(rand() % (max - min) + min);
 static void add_random_town(TownList * t_list, town_index_t i){
     t_list->list[i].x = RANDOM_COORD(0, t_list->config.grid_size);
@@ -15,20 +10,18 @@ static void add_random_town(TownList * t_list, town_index_t i){
 }
 
 TownList * tl_new(Config config){
-    town_index_t i, nvertexes = config.num_vertexes;
+    town_index_t i;
 
     TownList * newt = (TownList *) malloc(sizeof(TownList));
-    newt->list = (Town*) malloc(nvertexes * sizeof(Town));
     newt->config = config;
 
-    for (i=0; i < nvertexes; i++)
+    for (i=0; i < NUM_VERTEXES; i++)
         add_random_town(newt, i);
 
     return newt;
 }
 
 TownList * tl_destroy(TownList * t_list){
-    free(t_list->list);
     free(t_list);
     return t_list = NULL;
 }
