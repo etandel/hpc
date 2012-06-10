@@ -5,7 +5,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <MPI.h>
+#include <mpi.h>
 #include <string.h>
 
 static int should_replace(Tour * new, Tour * old, double temperature){
