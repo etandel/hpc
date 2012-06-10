@@ -18,7 +18,7 @@ static int should_replace(Tour * new, Tour * old, double temperature){
 int main(const int argc, const char *argv[]){
     Config state = {
         GRID_SIZE,
-        args.nvertex,
+        NUM_VERTEXES,
         ALPHA,
         EPSILON,
         TEMPERATURE

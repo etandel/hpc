@@ -14,13 +14,13 @@ static Tour * new_empty_tour(TownList *towns, town_index_t num_vertexes){
 }
 
 Tour * tour_new(TownList *towns) {
-    town_index_t i, num_vertexes = towns->config.num_vertexes;
-    TownPool *tp = tp_new(num_vertexes);
+    town_index_t i;
+    TownPool *tp = tp_new(NUM_VERTEXES);
     if (!tp)
         exit(1);
-    Tour * newtour = new_empty_tour(towns, num_vertexes);
+    Tour * newtour = new_empty_tour(towns, NUM_VERTEXES);
     
-    for (i=0; i<num_vertexes; i++){
+    for (i=0; i<NUM_VERTEXES; i++){
         newtour->tour[i] = tp_random_town(tp);
     }
     
@@ -39,10 +39,10 @@ Tour * tour_destroy(Tour * tour){
 double tour_length(Tour * tour){
     double len = 0;
     TownList * towns = tour->town_list;
-    town_index_t i=1, n_vertexes = towns->config.num_vertexes;
+    town_index_t i=1;
     town_index_t *index_list = tour->tour;
 
-    for(i=1; i<n_vertexes; i++)
+    for(i=1; i<NUM_VERTEXES; i++)
         len += tl_distance(towns, index_list[i-1], index_list[i]);
     len += tl_distance(towns, index_list[0], index_list[i-1]);
 
@@ -50,15 +50,14 @@ double tour_length(Tour * tour){
 }
 
 Tour * tour_mutate(Tour *old_tour) {
-    town_index_t i, num_vertexes;
+    town_index_t i;
     TownPool *tp;
     Tour * new_tour;
 
-    num_vertexes = old_tour->town_list->config.num_vertexes;
-    tp           = tp_new(num_vertexes);
-    new_tour     = new_empty_tour(old_tour->town_list, num_vertexes);
+    tp           = tp_new(NUM_VERTEXES);
+    new_tour     = new_empty_tour(old_tour->town_list, NUM_VERTEXES);
 
-    for (i=0; i<num_vertexes; i++){
+    for (i=0; i<NUM_VERTEXES; i++){
         new_tour->tour[i] = old_tour->tour[i];
     }
 
