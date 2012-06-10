@@ -3,11 +3,6 @@
 #include "town.h"
 #include "config.h"
 
-struct town{
-    coord_t x;
-    coord_t y;
-};
-
 TownList * tl_new(Config config){
     TownList * newt = (TownList *) malloc(sizeof(TownList));
     newt->list = (Town*) malloc(NUM_VERTEXES * sizeof(Town));

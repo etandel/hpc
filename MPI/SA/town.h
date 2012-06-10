@@ -3,6 +3,10 @@
 
 #include "config.h"
 
+struct town{
+    coord_t x;
+    coord_t y;
+};
 typedef struct town Town;
 
 struct townlist {
