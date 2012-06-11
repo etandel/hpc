@@ -29,14 +29,18 @@ int main (int argc, char * argv[]){
     if (rank == MASTER)
         start = MPI_Wtime();
 
-    // initialization
+    // allocation
     t_list = tl_new(NUM_VERTEXES);
     parents  = pop_new(t_list);
     children = pop_new(t_list);
     
+    // initialization
     if (rank == MASTER){
         tl_randomize(t_list);
         pop_randomize(parents);
+    }
+    pop_set_fit(parents);
+    if (rank == MASTER){
         max_fitness = parents->max_fitness;
         fittest     = parents->pop[parents->fittest];
     }
@@ -45,6 +49,7 @@ int main (int argc, char * argv[]){
     do {
         iter++;
         pop_reproduce(children, parents);
+        pop_set_fit(children);
         if (children->max_fitness > max_fitness){
             fittest     = children->pop[children->fittest];
             //printf("fittest fitness: %f\n", fittest.fitness);

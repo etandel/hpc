@@ -26,6 +26,7 @@ int main (const int argc, const char * argv[]){
 
     parents  = pop_new(t_list);
     pop_randomize(parents);
+    pop_set_fit(parents);
     max_fitness = parents->max_fitness;
     fittest     = parents->pop[parents->fittest];
 
@@ -33,6 +34,7 @@ int main (const int argc, const char * argv[]){
     do {
         iter++;
         pop_reproduce(children, parents);
+        pop_set_fit(children);
         if (children->max_fitness > max_fitness){
             fittest     = children->pop[children->fittest];
             //printf("fittest fitness: %f\n", fittest.fitness);

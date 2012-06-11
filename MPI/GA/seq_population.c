@@ -33,7 +33,7 @@ void subj_print_tour(Subject * subj, Town *t_list){
 
 /****** Beginning of random_new() and its auxiliary functions ******/
 
-static fit_t add_random_subj(Population * newp, subj_t i){
+static void add_random_subj(Population * newp, subj_t i){
     gene_t gene_i;
     Subject * subj = newp->pop+i;
     GenePool gp = gp_new();
@@ -42,34 +42,41 @@ static fit_t add_random_subj(Population * newp, subj_t i){
         subj->tour[gene_i] = gp_get_random(gp);
 
     gp_destroy(gp);
-
-    return subj->fitness = calc_fitness(subj, newp->t_list);
 }
 
 Population *pop_new(Town *t_list){
     Population *newp = (Population*) malloc(sizeof(Population));
     newp->pop        = (Subject*) malloc(POP_SIZE*sizeof(Subject));
-    newp->t_list  = t_list;
+    newp->t_list     = t_list;
     return newp;
 }
 
 void pop_randomize(Population *newp){
-    //returns new generation with random subjects
+    // randomizes population 
+    subj_t i;
+
+    //adds random subjs
+    for (i=0; i<POP_SIZE; i++)
+        add_random_subj(newp, i);
+}
+
+void pop_set_fit(Population *pop){
     subj_t i, fittest;
     fit_t max_fit=FIT_MIN;
 
     for (i=0; i<POP_SIZE; i++){
-        //adds random subjs and calcs fittest
-        fit_t new_fit;
-        new_fit = add_random_subj(newp, i);
+        // calcs and sets fitness related stuff
+        Subject *subj = pop->pop+i;
+        fit_t new_fit = calc_fitness(subj, pop->t_list);
+        subj->fitness = new_fit;
 
         if (new_fit > max_fit){
             max_fit = new_fit;
             fittest = i;
         }
     }
-    newp->max_fitness = max_fit;
-    newp->fittest     = fittest;
+    pop->max_fitness = max_fit;
+    pop->fittest     = fittest;
 }
 
 /****** End of random_new() and its auxiliary functions ******/
@@ -141,17 +148,14 @@ static Subject reproduce(Subject *parent_a, Subject *parent_b, Town * t_list){
     if (MUST_MUTATE)
         mutate(&new_subj);
 
-    new_subj.fitness = calc_fitness(&new_subj, t_list);
     gp_destroy(gp);
     return new_subj;   
 }
 
 #define random_parent(old_pop) (old_pop->pop+(rand()%POP_SIZE))
-#define BEST_FIT(s1, s2) (s1.fitness > s2.fitness ? i : i+1)
 void pop_reproduce(Population *newp, Population *oldp){
     //returns next generation
-    fit_t max_fit = FIT_MIN;
-    subj_t i, fittest;
+    subj_t i;
     Town *t_list = oldp->t_list;
 
     // generates, for every random pair of parents, 2 children
@@ -168,20 +172,7 @@ void pop_reproduce(Population *newp, Population *oldp){
 
         newp->pop[i]   = reproduce(parent_a, parent_b, t_list);
         newp->pop[i+1] = reproduce(parent_b, parent_a, t_list);
-       
-        //gets best of the 2 children and sets max_fit/fittest vars if better
-        best_child = BEST_FIT(newp->pop[i], newp->pop[i+1]);
-        best_child_fitness = newp->pop[best_child].fitness;
-        if (best_child_fitness > -1)
-            printf("%f\n", best_child_fitness);
-        if (best_child_fitness > max_fit){
-            max_fit = best_child_fitness;
-            fittest = best_child;
-        }
     }
-
-    newp->fittest = fittest;
-    newp->max_fitness = max_fit;
 }
 
 /****** End of next_generation() and its auxiliary functions ******/

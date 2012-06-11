@@ -32,10 +32,13 @@ void pop_destroy(Population *); //destroys population
 //return new empty population
 Population * pop_new(Town * t_list);
 
-// randomizes pre-allocated empty population
+// randomizes pre-allocated empty population, but doesn't calc fitness
 void pop_randomize(Population * empty_pop);
 
-// generates children (pre-allocated) based on parents
+// generates children (pre-allocated) based on parents. but doesn't calc fitness
 void pop_reproduce(Population *children, Population *parents);
+
+// calculates and sets fitness of all subjects
+void pop_set_fit(Population *pop);
 
 #endif
