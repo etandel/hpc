@@ -8,30 +8,40 @@
 
 #define MASTER 0
 
-int main (const int argc, const char * argv[]){
+int main (int argc, char * argv[]){
     Town *t_list;
     Population *parents, *children, *dummy;
     fit_t max_fitness = FIT_MIN;
     Subject fittest;
     int stag_count=0, iter=0;
 
+    int rank, size;
+
     double start;
     
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
     // puts("Executing parallel version");
 
     srand((int)time(NULL)); //seed pseudo-rand generator
-    //if (rank == MASTER)
+    if (rank == MASTER)
         start = MPI_Wtime();
 
     // initialization
     t_list = tl_new(NUM_VERTEXES);
-    tl_randomize(t_list);
     parents  = pop_new(t_list);
-    pop_randomize(parents);
-    max_fitness = parents->max_fitness;
-    fittest     = parents->pop[parents->fittest];
-
     children = pop_new(t_list);
+    
+    if (rank == MASTER){
+        tl_randomize(t_list);
+        pop_randomize(parents);
+        max_fitness = parents->max_fitness;
+        fittest     = parents->pop[parents->fittest];
+    }
+    MPI_Bcast(t_list, NUM_VERTEXES*sizeof(Town), MPI_BYTE, MASTER, MPI_COMM_WORLD);
+
     do {
         iter++;
         pop_reproduce(children, parents);
@@ -50,15 +60,18 @@ int main (const int argc, const char * argv[]){
         children = dummy;
     } while(stag_count < STAG_COUNT);
 
-    printf("Sequential iterations / time = %f\n", iter / (MPI_Wtime() - start));
-    /*
-    printf("Sequential iterations: %d ; sequential time: %f seconds.\n", iter, MPI_Wtime() - start);
-    printf("length: %.17f\n", subj_tour_length(&fittest, t_list));
-    // */
+    if (rank == MASTER) {
+        printf("Sequential iterations / time = %f\n", iter / (MPI_Wtime() - start));
+        /*
+        printf("Sequential iterations: %d ; sequential time: %f seconds.\n", iter, MPI_Wtime() - start);
+        printf("length: %.17f\n", subj_tour_length(&fittest, t_list));
+        // */
+    }
 
     pop_destroy(parents);
     pop_destroy(children);
     tl_destroy(t_list);
 
+    MPI_Finalize();
     return 0;
 }
