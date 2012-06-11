@@ -14,9 +14,9 @@ fit_t subj_tour_length(Subject * subj, Town *t_list){
     fit_t total_len = 0;
 
     for (i=0; i<NUM_VERTEXES-1; i++){
-        total_len += town_distance(t_list, tour[i], tour[i+1]);
+        total_len += tl_distance(t_list, tour[i], tour[i+1]);
     }
-    total_len += town_distance(t_list, tour[i], tour[0]); //the return to the beginning
+    total_len += tl_distance(t_list, tour[i], tour[0]); //the return to the beginning
 
     return total_len;
 }

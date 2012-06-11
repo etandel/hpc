@@ -6,6 +6,8 @@
 #include "population.h"
 #include <mpi.h>
 
+#define MASTER 0
+
 int main (const int argc, const char * argv[]){
     Town *t_list;
     Population *parents, *children, *dummy;
@@ -18,10 +20,12 @@ int main (const int argc, const char * argv[]){
     // puts("Executing parallel version");
 
     srand((int)time(NULL)); //seed pseudo-rand generator
-    start = MPI_Wtime();
+    //if (rank == MASTER)
+        start = MPI_Wtime();
 
     // initialization
-    t_list = town_list_init(NUM_VERTEXES);
+    t_list = tl_new(NUM_VERTEXES);
+    tl_randomize(t_list);
     parents  = pop_new(t_list);
     pop_randomize(parents);
     max_fitness = parents->max_fitness;
@@ -54,7 +58,7 @@ int main (const int argc, const char * argv[]){
 
     pop_destroy(parents);
     pop_destroy(children);
-    town_list_destroy(t_list);
+    tl_destroy(t_list);
 
     return 0;
 }

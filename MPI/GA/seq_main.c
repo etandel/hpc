@@ -21,7 +21,9 @@ int main (const int argc, const char * argv[]){
     start = MPI_Wtime();
 
     // initialization
-    t_list = town_list_init(NUM_VERTEXES);
+    t_list = tl_new(NUM_VERTEXES);
+    tl_randomize(t_list);
+
     parents  = pop_new(t_list);
     pop_randomize(parents);
     max_fitness = parents->max_fitness;
@@ -53,7 +55,7 @@ int main (const int argc, const char * argv[]){
     // */
     pop_destroy(parents);
     pop_destroy(children);
-    town_list_destroy(t_list);
+    tl_destroy(t_list);
 
     return 0;
 }

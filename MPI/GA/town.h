@@ -10,10 +10,11 @@ struct town{
 typedef struct town Town;
 
 
-Town * town_list_init(gene_t); //returns list of randomly generated towns
-void town_list_destroy(Town *); //destroy list of towns
+Town * tl_new(gene_t); // returns allocated but empy town list
+void tl_randomize(Town *); // randomizes pre-allocated town list
+void tl_destroy(Town *); //destroy list of towns
 
 //returns distance between two towns
-fit_t town_distance(Town *, gene_t, gene_t);
+fit_t tl_distance(Town *, gene_t, gene_t);
 
 #endif
