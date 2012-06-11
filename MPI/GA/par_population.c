@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <mpi.h>
 
 #define random_gene() ((gene_t)(rand() % NUM_VERTEXES))
 
@@ -12,7 +13,6 @@ fit_t subj_tour_length(Subject * subj, Town *t_list){
     gene_t i, *tour=subj->tour;
     fit_t total_len = 0;
 
-    #pragma omp parallel for reduction(+:total_len) lastprivate(i)
     for (i=0; i<NUM_VERTEXES-1; i++){
         total_len += town_distance(t_list, tour[i], tour[i+1]);
     }

@@ -4,17 +4,7 @@
 #include "config.h"
 #include "town.h"
 #include "population.h"
-#include <omp.h>
-
-
-static int has_verbose(const int argc, const char *argv[]){
-    int i, v=0;
-    for (i=0; i<argc; i++){
-        if (strcmp(argv[i], "-v") == 0)
-            v = 1;
-    }
-    return v;
-}
+#include <mpi.h>
 
 int main (const int argc, const char * argv[]){
     Town *t_list;
@@ -22,15 +12,13 @@ int main (const int argc, const char * argv[]){
     fit_t max_fitness = FIT_MIN;
     Subject fittest;
     int stag_count=0, iter=0;
-    int verbose = has_verbose(argc, argv);
 
     double start;
     
-    if (verbose)
-        puts("Executing sequential version");
+    // puts("Executing parallel version");
 
     srand((int)time(NULL)); //seed pseudo-rand generator
-    start = omp_get_wtime();
+    start = MPI_Wtime();
 
     // initialization
     t_list = town_list_init(NUM_VERTEXES);
@@ -58,11 +46,12 @@ int main (const int argc, const char * argv[]){
         children = dummy;
     } while(stag_count < STAG_COUNT);
 
-    printf("Sequential iterations / time = %f\n", iter / (omp_get_wtime() - start));
-    if (verbose){
-        printf("Sequential iterations: %d ; sequential time: %f seconds.\n", iter, omp_get_wtime() - start);
-        printf("length: %.17f\n", subj_tour_length(&fittest, t_list));
-    }
+    printf("Sequential iterations / time = %f\n", iter / (MPI_Wtime() - start));
+    /*
+    printf("Sequential iterations: %d ; sequential time: %f seconds.\n", iter, MPI_Wtime() - start);
+    printf("length: %.17f\n", subj_tour_length(&fittest, t_list));
+    // */
+
     pop_destroy(parents);
     pop_destroy(children);
     town_list_destroy(t_list);
