@@ -55,8 +55,6 @@ int main (int argc, char * argv[]){
         }
         pop_set_fit(children);
         if (rank == MASTER) {
-            int cond = children->max_fitness > max_fitness;
-            getchar();
             if (children->max_fitness > max_fitness){
                 fittest     = children->pop[children->fittest];
                 max_fitness = children->max_fitness;
@@ -84,8 +82,6 @@ int main (int argc, char * argv[]){
     pop_destroy(children);
     tl_destroy(t_list);
 
-    puts("lol");
     MPI_Finalize();
-    printf("fim %d\n", rank);
     return 0;
 }
