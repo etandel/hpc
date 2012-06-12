@@ -37,10 +37,9 @@ int main (const int argc, const char * argv[]){
         pop_set_fit(children);
         if (children->max_fitness > max_fitness){
             fittest     = children->pop[children->fittest];
-            //printf("fittest fitness: %f\n", fittest.fitness);
             max_fitness = children->max_fitness;
             stag_count  = 0;
-            printf("New max fitness: %.17f\n", max_fitness);
+            //printf("New max fitness: %.17f\n", max_fitness);
         }
         else
             stag_count++;

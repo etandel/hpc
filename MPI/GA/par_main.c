@@ -11,7 +11,7 @@
 int main (int argc, char * argv[]){
     Town *t_list;
     Population *parents, *children, *dummy;
-    fit_t max_fitness = FIT_MIN;
+    fit_t max_fitness;
     Subject fittest;
     int stag_count=0, iter=0;
 
@@ -23,11 +23,13 @@ int main (int argc, char * argv[]){
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
+    srand((int)time(NULL)); //seed pseudo-rand generator
+
     // puts("Executing parallel version");
 
-    srand((int)time(NULL)); //seed pseudo-rand generator
-    if (rank == MASTER)
+    if (rank == MASTER){
         start = MPI_Wtime();
+    }
 
     // allocation
     t_list = tl_new(NUM_VERTEXES);
@@ -47,22 +49,27 @@ int main (int argc, char * argv[]){
     MPI_Bcast(t_list, NUM_VERTEXES*sizeof(Town), MPI_BYTE, MASTER, MPI_COMM_WORLD);
 
     do {
-        iter++;
-        pop_reproduce(children, parents);
-        pop_set_fit(children);
-        if (children->max_fitness > max_fitness){
-            fittest     = children->pop[children->fittest];
-            //printf("fittest fitness: %f\n", fittest.fitness);
-            max_fitness = children->max_fitness;
-            stag_count  = 0;
-            printf("New max fitness: %.17f\n", max_fitness);
+        if (rank == MASTER){
+            iter++;
+            pop_reproduce(children, parents);
         }
-        else
-            stag_count++;
+        pop_set_fit(children);
+        if (rank == MASTER) {
+            int cond = children->max_fitness > max_fitness;
+            getchar();
+            if (children->max_fitness > max_fitness){
+                fittest     = children->pop[children->fittest];
+                max_fitness = children->max_fitness;
+                stag_count  = 0;
+                //printf("New max fitness: %.17f\n", max_fitness);
+            }
+            else
+                stag_count++;
 
-        dummy    = parents;
-        parents  = children;
-        children = dummy;
+            dummy    = parents;
+            parents  = children;
+            children = dummy;
+        }
     } while(stag_count < STAG_COUNT);
 
     if (rank == MASTER) {
@@ -77,6 +84,8 @@ int main (int argc, char * argv[]){
     pop_destroy(children);
     tl_destroy(t_list);
 
+    puts("lol");
     MPI_Finalize();
+    printf("fim %d\n", rank);
     return 0;
 }
