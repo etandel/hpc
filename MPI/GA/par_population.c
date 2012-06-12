@@ -7,6 +7,8 @@
 #include <math.h>
 #include <mpi.h>
 
+#define MASTER 0
+
 #define random_gene() ((gene_t)(rand() % NUM_VERTEXES))
 
 fit_t subj_tour_length(Subject * subj, Town *t_list){
@@ -61,14 +63,34 @@ void pop_randomize(Population *newp){
         add_random_subj(newp, i);
 }
 
-void pop_set_fit(Population *pop){
-    subj_t i, fittest;
-    fit_t max_fit=FIT_MIN;
+static Population * tmp_pop_new(Town *t_list, subj_t nsubj){
+    Population *newp = (Population*) malloc(sizeof(Population));
+    newp->pop        = (Subject*) malloc(nsubj*sizeof(Subject));
+    newp->t_list  = t_list;
+    return newp;
+}
 
-    for (i=0; i<POP_SIZE; i++){
-        // calcs and sets fitness related stuff
-        Subject *subj = pop->pop+i;
-        fit_t new_fit = calc_fitness(subj, pop->t_list);
+void pop_set_fit(Population *pop){
+    subj_t i, fittest, tmp_nsubj;
+    fit_t max_fit=FIT_MIN;
+    Population *tmp_pop;
+    int rank, size;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    tmp_nsubj = POP_SIZE / size;
+    tmp_pop = tmp_pop_new(pop->t_list, tmp_nsubj);
+
+    // scatters population
+    MPI_Scatter(pop->pop, tmp_nsubj*sizeof(Subject), MPI_BYTE,
+                tmp_pop->pop, tmp_nsubj*sizeof(Subject), MPI_BYTE,
+                MASTER, MPI_COMM_WORLD);
+    
+    //*
+    // everyone calcs and sets fitness related stuff
+    for (i=0; i<tmp_nsubj; i++){
+        Subject *subj = tmp_pop->pop+i;
+        fit_t new_fit = calc_fitness(subj, tmp_pop->t_list);
         subj->fitness = new_fit;
 
         if (new_fit > max_fit){
@@ -76,8 +98,30 @@ void pop_set_fit(Population *pop){
             fittest = i;
         }
     }
-    pop->max_fitness = max_fit;
-    pop->fittest     = fittest;
+    // */
+
+    // master receives done subjects
+    MPI_Gather(tmp_pop->pop, tmp_nsubj*sizeof(Subject), MPI_BYTE,
+               pop->pop, tmp_nsubj*sizeof(Subject), MPI_BYTE, 
+               MASTER, MPI_COMM_WORLD);
+
+    //*
+    // master sets max_fit
+    if (rank == MASTER) {
+        max_fit = FIT_MIN;
+        for (i=0; i<POP_SIZE; i++){
+            fit_t tmp_fit = pop->pop[i].fitness;
+            if (tmp_fit > max_fit){
+                max_fit = tmp_fit;
+                fittest = i;
+            }
+        }
+        pop->max_fitness = max_fit;
+        pop->fittest     = fittest;
+    }
+    // */
+
+    pop_destroy(tmp_pop);
 }
 
 /****** End of random_new() and its auxiliary functions ******/
