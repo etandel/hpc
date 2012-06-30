@@ -6,7 +6,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <mpi.h>
-#include <string.h>
+
+#define cron_begin clock
+#define cron_end(start) ((clock() - start) / CLOCKS_PER_SEC)
 
 static int should_replace(Tour * new, Tour * old, double temperature){
     // returns true if dl < 0 (new path is better than old)
@@ -34,7 +36,7 @@ int main(const int argc, const char *argv[]){
 
     srand((int)time(NULL));
 
-    start = MPI_Wtime();
+    start = cron_begin();
 
     towns = tl_new(state);
     tl_randomize(towns);
@@ -58,7 +60,7 @@ int main(const int argc, const char *argv[]){
     }
     
 
-    printf("Sequential time: %f\n", MPI_Wtime() - start);
+    printf("Sequential time: %f\n", cron_end(start));
     //printf("After %d iterations, the best length: %f\n", i, old_tour->length);
 
     tour_destroy(old_tour);

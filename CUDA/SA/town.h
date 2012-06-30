@@ -20,6 +20,11 @@ void tl_randomize(TownList*); // randomizes pre-allocated town list
 TownList * tl_destroy(TownList *); //destroy list of towns
 
 //returns distance between two towns
+#ifdef CUDA
+__device__ double tl_distance(TownList *, town_index_t, town_index_t);
+#else
 double tl_distance(TownList *, town_index_t, town_index_t);
+#endif
+
 
 #endif
