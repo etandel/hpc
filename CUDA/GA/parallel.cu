@@ -11,6 +11,9 @@
 #include "town.h"
 #include "population.h"
 
+#define NBLOCKS 1
+#define THREADS_PER_BLOCK (POP_SIZE/NBLOCKS)
+
 Subject *d_subjs;
 
 /******************** POOLS.C **********************/
@@ -108,32 +111,9 @@ void tl_destroy(Town * t_list){
     free(t_list);
 }
 
-fit_t tl_distance(Town * t_list, gene_t g1, gene_t g2){
-    Town *t1 = &t_list[g1], *t2 = &t_list[g2];
-    fit_t dx = (fit_t) (t2->x - t1->x);
-    fit_t dy = (fit_t) (t2->y - t1->y);
-    return (fit_t) sqrt((double)(dx*dx + dy*dy));
-}
-
 /******************** POPULATION.C **********************/
 
 #define random_gene() ((gene_t)(rand() % NUM_VERTEXES))
-
-fit_t subj_tour_length(Subject * subj, Town *t_list){
-    gene_t i = NUM_VERTEXES-1, *tour=subj->tour;
-    fit_t total_len = 0;
-
-    for (i=0; i<NUM_VERTEXES-1; i++){
-        total_len += tl_distance(t_list, tour[i], tour[i+1]);
-    }
-    total_len += tl_distance(t_list, tour[i], tour[0]); //the return to the beginning
-
-    return total_len;
-}
-
-fit_t calc_fitness(Subject * subj, Town *t_list){
-    return -subj_tour_length(subj, t_list);
-}
 
 void subj_print_tour(Subject * subj, Town *t_list){
     gene_t i;
@@ -171,23 +151,53 @@ void pop_randomize(Population *newp){
         add_random_subj(newp, i);
 }
 
+__device__ fit_t tl_distance(Town * t_list, gene_t g1, gene_t g2){
+    Town *t1 = &t_list[g1], *t2 = &t_list[g2];
+    fit_t dx = (fit_t) (t2->x - t1->x);
+    fit_t dy = (fit_t) (t2->y - t1->y);
+    return (fit_t) sqrt((double)(dx*dx + dy*dy));
+}
+
+__global__ void subj_calc_fit(Subject *subjs, Town *tlist){
+    gene_t i;
+    fit_t len=0;
+    for (i=0; i<NUM_VERTEXES; i++)
+        len += tl_distance(tlist, i, (i+1)%NUM_VERTEXES);
+    subjs[blockIdx.x*blockDim.x + threadIdx.x].fitness = -len;
+}
+
 void pop_set_fit(Population *pop){
     subj_t i, fittest;
     fit_t max_fit=FIT_MIN;
+    //fit_t h_fits[NUM_VERTEXES], *d_fits;
+    //cudaMalloc((void**)&d_fits, NUM_VERTEXES*sizeof(fit_t));
 
+    //copy data to device
+    cudaMemcpy(d_subjs, pop->pop, POP_SIZE*sizeof(Subject), cudaMemcpyHostToDevice);
+    subj_calc_fit<<<NBLOCKS, THREADS_PER_BLOCK>>>(d_subjs, pop->t_list);
+    cudaMemcpy(pop->pop, d_subjs, POP_SIZE*sizeof(Subject), cudaMemcpyDeviceToHost); //copy data from device
+
+    for(i=0; i<POP_SIZE; i++){
+        fit_t fit = pop->pop[i].fitness;
+        if (fit > max_fit){
+            max_fit = fit;
+            fittest = i;
+        }
+    }
+
+    /*
     for (i=0; i<POP_SIZE; i++){
         // calcs and sets fitness related stuff
         Subject *subj = pop->pop+i;
         fit_t new_fit = calc_fitness(subj, pop->t_list);
         subj->fitness = new_fit;
 
-        if (new_fit > max_fit){
-            max_fit = new_fit;
-            fittest = i;
-        }
     }
+    */
     pop->max_fitness = max_fit;
     pop->fittest     = fittest;
+
+    //cudaFree(d_fits);
 }
 
 /****** End of random_new() and its auxiliary functions ******/
