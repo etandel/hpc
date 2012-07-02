@@ -19,6 +19,6 @@ on type definitions below (marked with an *). */
 typedef unsigned int coord_t; //type of coordinates (> GRID_SIZE)
 typedef unsigned int gene_t; //type for indexing town list ( > NUM_VERTEXES)
 typedef unsigned int subj_t; //type for indexing subjects on pop. (> POP_SIZE)
-typedef double fit_t; //type for fitness (double strongly recommended)
+typedef float fit_t; //type for fitness (double strongly recommended)
 
 #endif

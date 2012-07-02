@@ -203,19 +203,9 @@ void pop_set_fit(Population *pop){
         }
     }
 
-    /*
-    for (i=0; i<POP_SIZE; i++){
-        // calcs and sets fitness related stuff
-        Subject *subj = pop->pop+i;
-        fit_t new_fit = calc_fitness(subj, pop->t_list);
-        subj->fitness = new_fit;
-
-    }
-    */
     pop->max_fitness = max_fit;
     pop->fittest     = fittest;
 
-    //cudaFree(d_fits);
 }
 
 /****** End of random_new() and its auxiliary functions ******/
