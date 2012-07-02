@@ -28,9 +28,3 @@ TownList * tl_destroy(TownList * t_list){
     return t_list = NULL;
 }
 
-double tl_distance(TownList * t_list, town_index_t i1, town_index_t i2){
-    Town *t1 = &t_list->list[i1], *t2 = &t_list->list[i2];
-    double dx = t2->x - t1->x;
-    double dy = t2->y - t1->y;
-    return sqrt(dx*dx + dy*dy);
-}
