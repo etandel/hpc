@@ -1,14 +1,12 @@
 #!/bin/bash
 
-ntests=10
-param_vertexes=10
-param_pop=10
+ntests=3
 
 ############ Sequential ###########
 echo -e "Executanto versao sequencial $ntests vezes.\n"
 seq_time=0
 for i in $(seq $ntests); do
-	    output=$(./sequential $param_vertexes $param_pop)
+	    output=$(./sequential)
     echo $output
    seq_time=$seq_time+$(echo $output | cut -d' ' -f6)
 done
@@ -16,27 +14,14 @@ seq_time=$(echo $seq_time | bc)
 echo -e "Total iter/time: $seq_time"
 
 
-############ Parallel 8 ###########
-echo -e "\nExecutanto versao paralela com 8 threads $ntests vezes."
-par8_time=0
+############ Parallel ###########
+echo -e "\nExecutanto versao paralela $ntests vezes."
+par_time=0
 for i in $(seq $ntests); do
-    output=$(./parallel -t 8 $param_vertexes $param_pop)
+    output=$(./parallel)
     echo "$output"
-    par8_time=$par8_time+$(echo $output | cut -d' ' -f6)
+    par_time=$par_time+$(echo $output | cut -d' ' -f6)
 done
-par8_time=$(echo $par8_time | bc)
-echo "Total iter/time: $par8_time"
-echo "Speedup 8: $(echo -e "scale=10\n"$par8_time/$seq_time | bc)"
-
-
-############ Parallel 4 ###########
-echo -e "\nExecutanto versao paralela com 4 threads $ntests vezes."
-par4_time=0
-for i in $(seq $ntests); do
-    output=$(./parallel -t 4 $param_vertexes $param_pop)
-    echo $output
-    par4_time=$par4_time+$(echo $output | cut -d' ' -f6)
-done
-par4_time=$(echo $par4_time | bc)
-echo "Total iter/time: $par4_time"
-echo "Speedup 4: $(echo -e "scale=10\n"$par4_time/$seq_time | bc)"
+par_time=$(echo $par_time | bc)
+echo "Total iter/time: $par_time"
+echo "Speedup : $(echo -e "scale=10\n"$par_time/$seq_time | bc)"
