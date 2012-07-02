@@ -65,7 +65,7 @@ int main(const int argc, const char *argv[]){
     }
     
 
-    printf("Sequential time: %f\n", cron_end(start));
+    printf("Parallel time: %f\n", cron_end(start));
     //printf("After %d iterations, the best length: %f\n", i, old_tour->length);
 
     tour_destroy(old_tour);
