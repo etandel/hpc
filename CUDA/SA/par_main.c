@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
+
 #define cron_begin() clock()
 #define cron_end(start) ((clock() - start) / CLOCKS_PER_SEC)
 
@@ -26,7 +29,7 @@ int main(const int argc, const char *argv[]){
         TEMPERATURE
     };
 
-    TownList * towns;
+    TownList * h_towns, *d_towns;
     Tour *old_tour, *new_tour;
     int i = 0;
     double start;
@@ -37,14 +40,17 @@ int main(const int argc, const char *argv[]){
 
     start = cron_begin();
 
-    towns = tl_new(state);
-    tl_randomize(towns);
+    h_towns = tl_new(state);
+    tl_randomize(h_towns);
+    cudaMalloc((void**)&d_towns, NUM_VERTEXES*sizeof(Town));
+    cudaMemcpy(d_towns, h_towns, NUM_VERTEXES*sizeof(Town), cudaMemcpyHostToDevice);
+    tl_destroy(h_towns);
 
-    old_tour = tour_new(towns, NUM_VERTEXES); 
+    old_tour = tour_new(d_towns, NUM_VERTEXES); 
     tour_randomize(old_tour);
     tour_set_len(old_tour);
 
-    new_tour = tour_new(towns, NUM_VERTEXES);
+    new_tour = tour_new(d_towns, NUM_VERTEXES);
     while (state.temperature > state.epsilon){
         i++;
         tour_mutate(new_tour, old_tour);
@@ -64,6 +70,6 @@ int main(const int argc, const char *argv[]){
 
     tour_destroy(old_tour);
     tour_destroy(new_tour);
-    tl_destroy(towns);
+    cudaFree(d_towns);
     return 0;
 }
