@@ -6,6 +6,9 @@
 #include "population.h"
 #include <mpi.h>
 
+#define cron_begin clock
+#define cron_end(start) ((clock() - start) / CLOCKS_PER_SEC)
+
 int main (const int argc, const char * argv[]){
     Town *t_list;
     Population *parents, *children, *dummy;
@@ -15,10 +18,10 @@ int main (const int argc, const char * argv[]){
 
     double start;
     
-    //puts("Executing sequential version");
+    //puts("Executing parallel version");
 
     srand((int)time(NULL)); //seed pseudo-rand generator
-    start = MPI_Wtime();
+    start = cron_begin();
 
     // initialization
     t_list = tl_new(NUM_VERTEXES);
@@ -49,9 +52,9 @@ int main (const int argc, const char * argv[]){
         children = dummy;
     } while(stag_count < STAG_COUNT);
 
-    printf("Parallel iterations / time = %f\n", iter / (MPI_Wtime() - start));
+    printf("Parallel iterations / time = %f\n", iter / cron_end(start));
     /*
-        printf("Parallel iterations: %d ; sequential time: %f seconds.\n", iter, MPI_Wtime() - start);
+        printf("Parallel iterations: %d ; parallel time: %f seconds.\n", iter, MPI_Wtime() - start);
         printf("length: %.17f\n", subj_tour_length(&fittest, t_list));
     // */
     pop_destroy(parents);
