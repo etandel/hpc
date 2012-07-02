@@ -11,6 +11,8 @@
 #include "town.h"
 #include "population.h"
 
+Subject *d_subjs;
+
 /******************** POOLS.C **********************/
 
 struct genepool {
@@ -304,7 +306,7 @@ void pop_destroy(Population * p){
 #define cron_end(start) ((clock() - start) / CLOCKS_PER_SEC)
 
 int main (const int argc, const char * argv[]){
-    Town *t_list;
+    Town *t_list, *d_tlist;
     Population *parents, *children, *dummy;
     fit_t max_fitness = FIT_MIN;
     Subject fittest;
@@ -320,14 +322,19 @@ int main (const int argc, const char * argv[]){
     // initialization
     t_list = tl_new(NUM_VERTEXES);
     tl_randomize(t_list);
+    cudaMalloc((void**)&d_tlist, NUM_VERTEXES*sizeof(Town));
+    cudaMemcpy(d_tlist, t_list, NUM_VERTEXES*sizeof(Town), cudaMemcpyHostToDevice);
+    tl_destroy(t_list);
 
-    parents  = pop_new(t_list);
+    cudaMalloc((void**)&d_subjs, POP_SIZE*sizeof(Subject));
+
+    parents  = pop_new(d_tlist);
     pop_randomize(parents);
     pop_set_fit(parents);
     max_fitness = parents->max_fitness;
     fittest     = parents->pop[parents->fittest];
 
-    children = pop_new(t_list);
+    children = pop_new(d_tlist);
     do {
         iter++;
         pop_reproduce(children, parents);
@@ -351,9 +358,10 @@ int main (const int argc, const char * argv[]){
         printf("Parallel iterations: %d ; parallel time: %f seconds.\n", iter, MPI_Wtime() - start);
         printf("length: %.17f\n", subj_tour_length(&fittest, t_list));
     // */
+    cudaFree(d_tlist);
     pop_destroy(parents);
     pop_destroy(children);
-    tl_destroy(t_list);
+    cudaFree(d_subjs);
 
     return 0;
 }

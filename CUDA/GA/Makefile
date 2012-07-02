@@ -3,7 +3,7 @@ IDIR =.
 CC=gcc
 H_CFLAGS=-I$(IDIR) -O0
 
-D_CFLAGS=-I$(IDIR)
+D_CFLAGS=-I$(IDIR) -DCUDA
 
 ODIR=obj
 LDIR=../lib
