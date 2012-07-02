@@ -11,8 +11,9 @@
 #include "town.h"
 #include "population.h"
 
-#define NBLOCKS 1
-#define THREADS_PER_BLOCK (POP_SIZE/NBLOCKS)
+#define THREADS_PER_SUBJECT 4
+#define THREADS_PER_BLOCK (1000)
+#define NBLOCKS (POP_SIZE*THREADS_PER_SUBJECT/THREADS_PER_BLOCK)
 
 Subject *d_subjs;
 
@@ -159,22 +160,39 @@ __device__ fit_t tl_distance(Town * t_list, gene_t g1, gene_t g2){
 }
 
 __global__ void subj_calc_fit(Subject *subjs, Town *tlist){
+    __shared__ fit_t len[POP_SIZE];
     gene_t i;
-    fit_t len=0;
-    for (i=0; i<NUM_VERTEXES; i++)
-        len += tl_distance(tlist, i, (i+1)%NUM_VERTEXES);
-    subjs[blockIdx.x*blockDim.x + threadIdx.x].fitness = -len;
+    fit_t tmp_len=0;
+
+    //thread id
+    int idx = blockIdx.x*blockDim.x + threadIdx.x;
+    //set subject whom this thread calcs
+    subj_t s_i = idx%(POP_SIZE/NBLOCKS) + blockIdx.x* POP_SIZE/NBLOCKS;
+    //set interval of calculation
+    gene_t begin = NUM_VERTEXES/THREADS_PER_SUBJECT * idx/(POP_SIZE/NBLOCKS);
+    gene_t end = begin + NUM_VERTEXES/THREADS_PER_SUBJECT;
+
+    if (idx < POP_SIZE)
+        len[s_i] = 0;
+    __syncthreads();
+
+    for (i=begin; i<end; i++)
+        tmp_len += tl_distance(tlist, i, (i+1)%NUM_VERTEXES);
+
+    atomicAdd(len+s_i, tmp_len);
+
+    if (idx < POP_SIZE)
+        subjs[s_i].fitness = -len[s_i];
 }
 
 void pop_set_fit(Population *pop){
     subj_t i, fittest;
     fit_t max_fit=FIT_MIN;
-    //fit_t h_fits[NUM_VERTEXES], *d_fits;
-    //cudaMalloc((void**)&d_fits, NUM_VERTEXES*sizeof(fit_t));
 
     //copy data to device
     cudaMemcpy(d_subjs, pop->pop, POP_SIZE*sizeof(Subject), cudaMemcpyHostToDevice);
     subj_calc_fit<<<NBLOCKS, THREADS_PER_BLOCK>>>(d_subjs, pop->t_list);
+    cudaThreadSynchronize();
     cudaMemcpy(pop->pop, d_subjs, POP_SIZE*sizeof(Subject), cudaMemcpyDeviceToHost); //copy data from device
 
     for(i=0; i<POP_SIZE; i++){
