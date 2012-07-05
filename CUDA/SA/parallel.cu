@@ -12,6 +12,7 @@
 #include "town.h"
 #include "tour.h"
 
+town_index_t *d_tour;
 
 /********************** POOLS.CU ***************************/
 
@@ -130,13 +131,6 @@ Tour * tour_destroy(Tour * tour){
     return tour = NULL;
 }
 
-static town_index_t * d_tour_new(Tour *h_t){
-    town_index_t *d_t;
-    cudaMalloc((void**)&d_t, NUM_VERTEXES*sizeof(town_index_t));
-    cudaMemcpy(d_t, h_t->tour, NUM_VERTEXES*sizeof(town_index_t), cudaMemcpyHostToDevice);
-    return d_t;
-}
-
 __device__ double tl_distance(TownList * t_list, town_index_t i1, town_index_t i2){
     Town *t1 = &t_list->list[i1], *t2 = &t_list->list[i2];
     double dx = t2->x - t1->x;
@@ -169,24 +163,27 @@ static __global__ void calc_len(TownList *tl, town_index_t *t, double *part_len)
 }
 
 double tour_set_len(Tour * tour){
-    town_index_t *d_tour;
-    double len = 0, h_part_len[NBLOCKS], *d_part_len;
+    double len = 0;
+    double h_partlen[NBLOCKS], *d_partlen=NULL; 
     int i;
 
-    d_tour = d_tour_new(tour);
-    cudaMalloc((void**)&d_part_len, NBLOCKS*sizeof(double));
-
-    calc_len<<<NBLOCKS, THREADS_PER_BLOCK>>>(tour->town_list, d_tour, d_part_len);
-    cudaMemcpy(h_part_len, d_part_len, NBLOCKS*sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMalloc((void**)d_partlen, NBLOCKS*sizeof(double));
+    calc_len<<<NBLOCKS, THREADS_PER_BLOCK>>>(tour->town_list, d_tour, d_partlen);
+    cudaThreadSynchronize();
+    cudaMemcpy(h_partlen, d_partlen, NBLOCKS*sizeof(double), cudaMemcpyDeviceToHost);
 
     for (i=0; i<NBLOCKS; i++)
-        len += h_part_len[i];
-
-    cudaFree(d_part_len);
-    cudaFree(d_tour);
+        len += h_partlen[i];
 
     tour->length = len;
+    cudaFree(d_partlen);
     return len;
+}
+
+static __global__ void d_mutate(town_index_t *d_t, town_index_t i1, town_index_t i2){
+    town_index_t tmp = d_t[i1];
+    d_t[i1] = d_t[i2];
+    d_t[i2] = tmp;
 }
 
 void tour_mutate(Tour *new_tour, Tour *old_tour) {
@@ -205,6 +202,7 @@ void tour_mutate(Tour *new_tour, Tour *old_tour) {
         i2 = (town_index_t)tp_random_town(tp);
         new_tour->tour[i1] = old_tour->tour[i2];
         new_tour->tour[i2] = old_tour->tour[i1];
+        d_mutate<<<1, 1>>>(d_tour, i1, i2);
     }
 
     tp_destroy(tp);
@@ -218,6 +216,13 @@ void tour_mutate(Tour *new_tour, Tour *old_tour) {
 int should_replace(Tour *newt, Tour *old, double temperature){
     double dl = newt->length - old->length;
     return dl<0 ? 1 : rand()/RAND_MAX < exp(-dl/temperature);
+}
+
+static town_index_t * d_tour_new(Tour *h_t){
+    town_index_t *d_t;
+    cudaMalloc((void**)&d_t, NUM_VERTEXES*sizeof(town_index_t));
+    cudaMemcpy(d_t, h_t->tour, NUM_VERTEXES*sizeof(town_index_t), cudaMemcpyHostToDevice);
+    return d_t;
 }
 
 
@@ -249,6 +254,7 @@ int main(const int argc, const char *argv[]){
 
     old_tour = tour_new(d_towns, NUM_VERTEXES); 
     tour_randomize(old_tour);
+    d_tour = d_tour_new(old_tour);
     tour_set_len(old_tour);
 
     new_tour = tour_new(d_towns, NUM_VERTEXES);
@@ -272,5 +278,6 @@ int main(const int argc, const char *argv[]){
     tour_destroy(old_tour);
     tour_destroy(new_tour);
     cudaFree(d_towns);
+    cudaFree(d_tour);
     return 0;
 }
